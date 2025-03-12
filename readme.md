@@ -8,6 +8,7 @@ This is a simple Django REST API application that provides a faucet service for 
 - **POST /faucet/fund**: Sends 0.0001 Sepolia ETH from a pre-configured wallet to the specified wallet address.
 - **GET /faucet/stats**: Returns statistics for the number of successful and failed transactions in the last 24 hours.
 - **Swagger Documentation**: Interactive API documentation available at `/swagger/`.
+- **CI**: Included a github action for building and running test on every Main push.
 
 ## Requirements
 
