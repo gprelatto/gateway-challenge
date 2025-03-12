@@ -53,7 +53,8 @@ The API is provided with basic unit tests that covers:
 
 - test_fund_wallet_success: should succeed if valid wallet address is provided
 - test_fund_wallet_invalid_address: should fail if invalid wallet address is provided
-- test_fund_wallet_rate_limit: should fail if rate limit is exceeded
+- test_fund_wallet_rate_limit: should fail if rate limit is exceeded (wallet)
+- test_fund_wallet_rate_limit_ip: should fail if rate limit is exceeded (ip)
 - test_faucet_stats: should return correct statistics
 
 Run them with:

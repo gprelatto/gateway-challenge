@@ -16,6 +16,7 @@ def fund_wallet(request):
     serializer = FundWalletSerializer(data=request.data)
     if serializer.is_valid():
         wallet_to_fund = serializer.validated_data['wallet_to']
+        source_ip = request.META.get('REMOTE_ADDR')
         # Initialize web3
         web3 = Web3(Web3.HTTPProvider(settings.WEB3_PROVIDER_URI))
 
@@ -23,14 +24,22 @@ def fund_wallet(request):
         if not web3.is_address(wallet_to_fund):
             return Response({"error": "Invalid wallet address"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check rate limit
+        # Check rate limit for wallet address
         one_minute_ago = timezone.now() - timedelta(minutes=1)
-        recent_transactions = Transaction.objects.filter(
+        recent_transactions_wallet = Transaction.objects.filter(
             created_at__gte=one_minute_ago,
             wallet_to=wallet_to_fund
         )
-        if recent_transactions.exists():
-            return Response({"error": "Rate limit exceeded. Try again later."}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+        if recent_transactions_wallet.exists():
+            return Response({"error": "Rate limit exceeded for wallet address. Try again later."}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+
+        # Check rate limit for source IP
+        recent_transactions_ip = Transaction.objects.filter(
+            created_at__gte=one_minute_ago,
+            source_ip=source_ip
+        )
+        if recent_transactions_ip.exists():
+            return Response({"error": "Rate limit exceeded for IP address. Try again later."}, status=status.HTTP_429_TOO_MANY_REQUESTS)
 
         # before tx, we get the gas price from network:
         gas_price = web3.eth.gas_price
@@ -60,6 +69,7 @@ def fund_wallet(request):
             # Save tx record
             transaction = Transaction.objects.create(
                 wallet_to=wallet_to_fund,
+                source_ip=source_ip,
                 status='success',
                 transaction_id=tx_receipt.transactionHash.hex()
             )
@@ -69,6 +79,7 @@ def fund_wallet(request):
             # Save tx record
             transaction = Transaction.objects.create(
                 wallet_to=wallet_to_fund,
+                source_ip=source_ip,
                 status='failed'
             )            
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

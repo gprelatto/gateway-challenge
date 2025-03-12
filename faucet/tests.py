@@ -57,6 +57,23 @@ class FaucetTests(TestCase):
             self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
             self.assertIn("error", response.data)
 
+    @patch('faucet.views.Web3')
+    def test_fund_wallet_rate_limit_ip(self, MockWeb3):
+        with self.subTest("should fail if rate limit is exceeded for IP address"):
+            mock_web3 = MockWeb3.return_value
+            mock_web3.is_address.return_value = True
+            mock_web3.eth.get_transaction_count.return_value = 1
+            mock_web3.eth.gas_price = 20000000000
+            mock_web3.eth.estimate_gas.return_value = 21000
+            mock_web3.eth.account.sign_transaction.return_value = MagicMock(rawTransaction=b'signed_tx')
+            mock_web3.eth.send_raw_transaction.return_value = b'tx_hash'
+            mock_web3.eth.wait_for_transaction_receipt.return_value = MagicMock(transactionHash=b'tx_hash')
+
+            self.client.post(self.fund_url, {"wallet_to": self.valid_wallet_address}, format='json')
+            response = self.client.post(self.fund_url, {"wallet_to": "0x0000000000000000000000000000000000000001"}, format='json')
+            self.assertEqual(response.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
+            self.assertIn("error", response.data)
+
     def test_faucet_stats(self):
         with self.subTest("should return correct statistics"):
             # Create some transactions
