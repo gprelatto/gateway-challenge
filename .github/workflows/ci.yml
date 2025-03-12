@@ -27,7 +27,7 @@ jobs:
         run: docker-compose up --build -d
 
       - name: Run tests
-        run: docker-compose exec web python manage.py test
+        run: docker-compose exec -T web python manage.py test
 
       - name: Stop Docker containers
         run: docker-compose down
