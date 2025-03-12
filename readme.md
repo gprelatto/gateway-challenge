@@ -68,7 +68,7 @@ Open your web browser and navigate to http://localhost:8000/swagger/ to view the
 2. Endpoints:
 - POST /api/faucet/fund: Send Sepolia ETH to a specified wallet address.
     - Body
-    ``json
+    ```json
         {
             "wallet_to": "0x0000000000000000000000000000000000000000"
         }
