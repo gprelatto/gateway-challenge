@@ -58,9 +58,9 @@ The API is provided with basic unit tests that covers:
 - test_faucet_stats: should return correct statistics
 
 Run them with:
-    ```sh
-    docker-compose exec web python manage.py test
-    ```
+ ```sh
+ docker-compose exec web python manage.py test
+ ```
 ## Usage
 
 1. Access Swagger to play with the endpoints
